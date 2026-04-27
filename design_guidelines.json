@@ -1,0 +1,103 @@
+{
+  "theme": "Light",
+  "archetype": "4 (Swiss & High-Contrast)",
+  "language": "es",
+  "design_principles": [
+    "Authority, clarity, and function-first focus",
+    "High-contrast data hierarchy for quick scanning",
+    "Generous internal padding in cards (p-6), tight gap between grid items (gap-6)",
+    "Strict grid alignment using 'Control Room' grid layout",
+    "Color is function only - UI is mostly monochrome, color exists to guide action",
+    "Optical alignment over geometrical alignment"
+  ],
+  "colors": {
+    "background": "#FAFAFA",
+    "surface": "#FFFFFF",
+    "primary": "#2563EB",
+    "primary_hover": "#1D4ED8",
+    "text_main": "#09090B",
+    "text_muted": "#71717A",
+    "border": "#E4E4E7",
+    "status": {
+      "success": { "bg": "#D1FAE5", "text": "#065F46", "border": "#A7F3D0" },
+      "warning": { "bg": "#FEF3C7", "text": "#92400E", "border": "#FDE68A" },
+      "error": { "bg": "#FEE2E2", "text": "#991B1B", "border": "#FECACA" },
+      "info": { "bg": "#DBEAFE", "text": "#1E40AF", "border": "#BFDBFE" }
+    }
+  },
+  "typography": {
+    "heading_font": "Cabinet Grotesk",
+    "body_font": "Manrope",
+    "h1": "text-4xl sm:text-5xl font-bold tracking-tight text-zinc-950",
+    "h2": "text-2xl sm:text-3xl font-semibold tracking-tight text-zinc-950",
+    "h3": "text-xl sm:text-2xl font-medium tracking-tight text-zinc-950",
+    "h4": "text-lg sm:text-xl font-medium tracking-tight text-zinc-900",
+    "body": "text-base text-zinc-600 leading-relaxed",
+    "small": "text-sm text-zinc-500",
+    "label": "text-xs font-bold uppercase tracking-[0.2em] text-zinc-500"
+  },
+  "spacing_and_layout": {
+    "dashboard_grid": "grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6",
+    "card_padding": "p-6",
+    "section_spacing": "py-12 md:py-16",
+    "border_radius": "rounded-lg"
+  },
+  "components": {
+    "buttons": "h-10 px-6 rounded-lg font-medium transition-colors focus:ring-2 focus:ring-blue-300 focus:outline-none",
+    "cards": "bg-white border border-zinc-200 rounded-lg shadow-sm hover:shadow-md transition-shadow",
+    "inputs": "h-10 px-4 rounded-lg border border-zinc-200 bg-white text-zinc-950 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none",
+    "tables": "w-full text-sm text-left border-collapse",
+    "table_headers": "bg-zinc-50 text-zinc-500 font-bold uppercase tracking-wider py-3 px-4 border-b border-zinc-200",
+    "table_cells": "py-4 px-4 border-b border-zinc-100 text-zinc-700",
+    "sidebar": "w-64 bg-white border-r border-zinc-200 flex flex-col h-screen fixed top-0 left-0",
+    "sidebar_link": "flex items-center gap-3 px-4 py-3 rounded-lg text-zinc-600 hover:bg-zinc-50 hover:text-zinc-950 transition-colors font-medium",
+    "sidebar_link_active": "flex items-center gap-3 px-4 py-3 rounded-lg bg-zinc-100 text-zinc-950 font-bold"
+  },
+  "icons": {
+    "library": "@phosphor-icons/react",
+    "install_command": "yarn add @phosphor-icons/react",
+    "usage": "Use Phosphor Icons (Weight: Regular for inactive, Bold for active states) for dense dashboard layouts."
+  },
+  "animations": {
+    "hover": "transition-all duration-200 ease-in-out",
+    "page_transition": "animate-in fade-in slide-in-from-bottom-4 duration-500"
+  },
+  "media": {
+    "login_hero_bg": {
+      "url": "https://images.pexels.com/photos/16094585/pexels-photo-16094585.jpeg",
+      "description": "Interior view of car dashboard for login screen background"
+    },
+    "vehicle_placeholders": [
+      {
+        "url": "https://images.pexels.com/photos/18127728/pexels-photo-18127728.jpeg",
+        "description": "White luxury SUV for vehicle listing"
+      },
+      {
+        "url": "https://images.pexels.com/photos/19410430/pexels-photo-19410430.jpeg",
+        "description": "White SUV underground for vehicle listing"
+      },
+      {
+        "url": "https://images.pexels.com/photos/33268786/pexels-photo-33268786.jpeg",
+        "description": "White sports car for vehicle listing"
+      }
+    ]
+  },
+  "accessibility": {
+    "contrast": "Ensure all text meets WCAG AA standards (4.5:1 ratio).",
+    "focus": "All interactive elements must have visible focus rings (`focus:ring-2 focus:ring-blue-300`).",
+    "testing": "All interactive and key informational elements MUST include a `data-testid` attribute (e.g., `data-testid=\"login-submit-button\"`)."
+  },
+  "instructions_to_main_agent": [
+    "Initialize Tailwind CSS and configure fonts 'Cabinet Grotesk' (Headings) and 'Manrope' (Body). Add Google Fonts/Fontshare CDN links in index.html.",
+    "Install `@phosphor-icons/react` for iconography.",
+    "Build the dashboard layout with a fixed left sidebar (250px or 64 w) and a main content area.",
+    "Ensure all text is translated to Spanish (e.g., Tablero, Reservas, Vehículos, Clientes).",
+    "Use Shadcn UI for complex components like DatePicker (for reservations), Select, Dialogs, and Data Tables.",
+    "Apply 'Control Room' bento grid for the Tablero (Dashboard): summary metrics at the top (col-span-1 each), followed by a recent reservations table (col-span-2 or 3) and a small chart widget.",
+    "Create a clean Login page using the `login_hero_bg` image with a dark overlay (`bg-zinc-900/40`) on one side, and the login form on the other (split screen).",
+    "Vehicle listing should use a card or table view with badges indicating status (Disponible = Green, Alquilado = Blue, Mantenimiento = Amber).",
+    "Add `data-testid` attributes to all buttons, links, form inputs, and key informational elements. Use kebab-case and role-based naming (e.g., `data-testid=\"sidebar-nav-reservations\"`).",
+    "Use standard HTML inputs if Shadcn forms are overkill, but style them according to the input classes above.",
+    "Use Recharts for the reports/analytics charts with the defined primary color (`#2563EB`)."
+  ]
+}
