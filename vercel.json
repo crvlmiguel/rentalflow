@@ -1,18 +1,1 @@
-{
-  "builds": [
-    { "src": "backend/server.py", "use": "@vercel/python" },
-    { "src": "frontend/package.json", "use": "@vercel/static-build", "config": { "distDir": "build" } }
-  ],
-  "routes": [
-    { "src": "/api/(.*)", "dest": "backend/server.py" },
-    { "src": "/(.*)", "dest": "/$1" }
-  ],
-  "env": {
-    "DB_NAME": "rentalflow"
-  },
-  "build": {
-    "env": {
-      "REACT_APP_BACKEND_URL": ""
-    }
-  }
-}
+{"builds":[{"src":"backend/server.py","use":"@vercel/python"},{"src":"frontend/package.json","use":"@vercel/static-build","config":{"distDir":"build"}}],"routes":[{"src":"/api/(.*)","dest":"backend/server.py"},{"handle":"filesystem"},{"src":"/(.*)","dest":"/index.html"}],"env":{"DB_NAME":"rentalflow"},"build":{"env":{"REACT_APP_BACKEND_URL":""}}}
