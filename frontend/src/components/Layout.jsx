@@ -8,13 +8,13 @@ import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 
 const NAV = [
-  { to: "/", label: "Tablero", icon: House, end: true, testid: "nav-dashboard" },
+  { to: "/", label: "Painel", icon: House, end: true, testid: "nav-dashboard" },
   { to: "/reservas", label: "Reservas", icon: CalendarBlank, testid: "nav-reservations" },
-  { to: "/calendario", label: "Calendario", icon: CalendarDots, testid: "nav-calendar" },
+  { to: "/calendario", label: "Calendário", icon: CalendarDots, testid: "nav-calendar" },
   { to: "/clientes", label: "Clientes", icon: Users, testid: "nav-customers" },
-  { to: "/vehiculos", label: "Vehículos", icon: Car, testid: "nav-vehicles" },
-  { to: "/pagos", label: "Pagos", icon: CreditCard, testid: "nav-payments" },
-  { to: "/reportes", label: "Reportes", icon: ChartBar, testid: "nav-reports" },
+  { to: "/vehiculos", label: "Veículos", icon: Car, testid: "nav-vehicles" },
+  { to: "/pagos", label: "Pagamentos", icon: CreditCard, testid: "nav-payments" },
+  { to: "/reportes", label: "Relatórios", icon: ChartBar, testid: "nav-reports" },
 ];
 
 export default function Layout() {
@@ -80,7 +80,7 @@ export default function Layout() {
           data-testid="logout-button"
         >
           <SignOut size={16} weight="bold" />
-          Cerrar sesión
+          Terminar sessão
         </Button>
       </div>
     </aside>
@@ -106,7 +106,7 @@ export default function Layout() {
             onClick={() => setOpen(true)}
             className="p-2 rounded-md hover:bg-zinc-100"
             data-testid="open-sidebar-button"
-            aria-label="Abrir menú"
+            aria-label="Abrir menu"
           >
             <List size={20} weight="bold" />
           </button>
@@ -115,7 +115,7 @@ export default function Layout() {
             onClick={handleLogout}
             className="p-2 rounded-md hover:bg-zinc-100"
             data-testid="mobile-logout-button"
-            aria-label="Cerrar sesión"
+            aria-label="Terminar sessão"
           >
             <SignOut size={18} weight="bold" />
           </button>
