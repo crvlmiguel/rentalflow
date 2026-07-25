@@ -22,7 +22,7 @@ export default function Login() {
     const res = await login(email, password);
     setLoading(false);
     if (res.ok) {
-      toast.success("Bienvenido de vuelta");
+      toast.success("Bem-vindo de volta");
       nav("/");
     } else {
       setErr(res.error);
@@ -51,20 +51,20 @@ export default function Login() {
           </div>
 
           <div className="space-y-6 max-w-md">
-            <div className="label-uppercase text-zinc-300">Plataforma de gestión</div>
+            <div className="label-uppercase text-zinc-300">Plataforma de gestão</div>
             <h1 className="font-display text-4xl sm:text-5xl font-bold leading-[1.05] tracking-tight">
-              Controla tu flota,<br/>reservas y pagos<br/>en un solo lugar.
+              Controle a sua frota,<br/>reservas e pagamentos<br/>num só lugar.
             </h1>
             <p className="text-zinc-300 text-base leading-relaxed">
-              Una plataforma operativa para empresas de alquiler. Reservas, calendario,
-              clientes y reportes—rápidos y precisos.
+              Uma plataforma operacional para empresas de aluguer. Reservas, calendário,
+              clientes e relatórios — rápidos e precisos.
             </p>
           </div>
 
           <div className="flex items-center gap-8 text-sm text-zinc-300 border-t border-white/10 pt-6">
             <div><span className="font-display font-bold text-white text-lg">99.9%</span> uptime</div>
-            <div><span className="font-display font-bold text-white text-lg">+1k</span> reservas / mes</div>
-            <div><span className="font-display font-bold text-white text-lg">24/7</span> operación</div>
+            <div><span className="font-display font-bold text-white text-lg">+1k</span> reservas / mês</div>
+            <div><span className="font-display font-bold text-white text-lg">24/7</span> operação</div>
           </div>
         </div>
       </div>
@@ -79,17 +79,17 @@ export default function Login() {
             <div className="font-display font-bold text-xl text-zinc-950">RentaFlow</div>
           </div>
 
-          <div className="label-uppercase mb-3">Iniciar sesión</div>
+          <div className="label-uppercase mb-3">Iniciar sessão</div>
           <h2 className="font-display text-3xl sm:text-4xl font-bold tracking-tight text-zinc-950 mb-2">
-            Accede a tu panel
+            Aceda ao seu painel
           </h2>
           <p className="text-zinc-600 mb-8">
-            Ingresa tus credenciales para gestionar tu negocio.
+            Introduza as suas credenciais para gerir o seu negócio.
           </p>
 
           <form onSubmit={submit} className="space-y-5" data-testid="login-form">
             <div>
-              <Label htmlFor="email" className="label-uppercase mb-2 block">Correo</Label>
+              <Label htmlFor="email" className="label-uppercase mb-2 block">E-mail</Label>
               <Input
                 id="email"
                 type="email"
@@ -102,7 +102,7 @@ export default function Login() {
               />
             </div>
             <div>
-              <Label htmlFor="password" className="label-uppercase mb-2 block">Contraseña</Label>
+              <Label htmlFor="password" className="label-uppercase mb-2 block">Palavra-passe</Label>
               <Input
                 id="password"
                 type="password"
@@ -127,16 +127,16 @@ export default function Login() {
               className="w-full h-11 bg-zinc-900 hover:bg-zinc-800 text-white font-semibold rounded-lg group"
               data-testid="login-submit-button"
             >
-              {loading ? "Ingresando…" : (
+              {loading ? "A entrar…" : (
                 <span className="inline-flex items-center gap-2">
-                  Iniciar sesión <ArrowRight size={16} weight="bold" className="group-hover:translate-x-0.5 transition-transform" />
+                  Iniciar sessão <ArrowRight size={16} weight="bold" className="group-hover:translate-x-0.5 transition-transform" />
                 </span>
               )}
             </Button>
           </form>
 
           <div className="mt-8 p-4 rounded-lg bg-zinc-50 border border-zinc-200 text-sm text-zinc-600">
-            <div className="label-uppercase text-zinc-500 mb-2">Cuentas de prueba</div>
+            <div className="label-uppercase text-zinc-500 mb-2">Contas de teste</div>
             <div><span className="font-mono text-xs">admin@rentcar.com</span> / <span className="font-mono text-xs">admin123</span> (Admin)</div>
             <div><span className="font-mono text-xs">staff@rentcar.com</span> / <span className="font-mono text-xs">staff123</span> (Staff)</div>
           </div>
