@@ -21,28 +21,70 @@ from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel, Field, EmailStr
 
-# ---------------------------------------------------------------------------
-# Setup
-# ---------------------------------------------------------------------------
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger("rentcar")
 
-mongo_url = os.environ["MONGO_URL"]
-client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ["DB_NAME"]]
 
-JWT_SECRET = os.environ["JWT_SECRET"]
+def _resolve_mongo_url() -> str:
+    """Resolve a MongoDB connection string from whichever env vars are present.
+
+    Supports the variable name the backend originally expected (MONGO_URL) as
+    well as names created directly in Vercel's dashboard (MONGODB_URI, and
+    MONGODB_USERNAME/MONGODB_PASSWORD as a fallback if MONGODB_URI turns out
+    to be just a bare host instead of a full connection string).
+    """
+    direct = os.environ.get("MONGO_URL")
+    if direct:
+        return direct
+
+    db_name = os.environ.get("DB_NAME", "rentalflow")
+
+    uri = os.environ.get("MONGODB_URI")
+    if uri:
+        if uri.startswith("mongodb://") or uri.startswith("mongodb+srv://"):
+            return uri
+        # MONGODB_URI holds just a host (e.g. cluster0.xxxxx.mongodb.net) —
+        # build the full string from the separate credential vars.
+        username = os.environ.get("MONGODB_USERNAME", "")
+        password = os.environ.get("MONGODB_PASSWORD", "")
+        if username and password:
+            return (
+                f"mongodb+srv://{username}:{password}@{uri}/{db_name}"
+                f"?retryWrites=true&w=majority&appName=Cluster0"
+            )
+        return uri
+
+    username = os.environ.get("MONGODB_USERNAME")
+    password = os.environ.get("MONGODB_PASSWORD")
+    if username and password:
+        return (
+            f"mongodb+srv://{username}:{password}@cluster0.qjq8wqx.mongodb.net/{db_name}"
+            f"?retryWrites=true&w=majority&appName=Cluster0"
+        )
+
+    raise RuntimeError(
+        "Nenhuma variável de ligação MongoDB encontrada. Defina MONGO_URL, "
+        "ou MONGODB_URI (connection string completa ou apenas o host), "
+        "ou MONGODB_USERNAME + MONGODB_PASSWORD."
+    )
+
+
+mongo_url = _resolve_mongo_url()
+client = AsyncIOMotorClient(mongo_url)
+db = client[os.environ.get("DB_NAME", "rentalflow")]
+
+# Fallback fixo (não gerado aleatoriamente) para que tokens continuem válidos
+# entre invocações de funções serverless distintas caso JWT_SECRET não esteja
+# definido no ambiente.
+JWT_SECRET = os.environ.get("JWT_SECRET", "K7f2Qs9vXz3mP8tRlA1cJhN6bU4wYdE0oGqZsT5xVmC2rFnH")
 JWT_ALGO = "HS256"
-ACCESS_TTL_MIN = 60 * 24  # 1 day for ease of use
+ACCESS_TTL_MIN = 60 * 24
 REFRESH_TTL_DAYS = 7
 
 app = FastAPI(title="RentaFlow API")
 api = APIRouter(prefix="/api")
 
 
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
 def hash_password(password: str) -> str:
     return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
@@ -115,9 +157,6 @@ def days_between(a, b) -> int:
     return max(1, (db_ - da).days)
 
 
-# ---------------------------------------------------------------------------
-# Models
-# ---------------------------------------------------------------------------
 class RegisterIn(BaseModel):
     email: EmailStr
     password: str
@@ -151,7 +190,7 @@ class CustomerIn(BaseModel):
 class ReservationIn(BaseModel):
     customer_id: str
     vehicle_id: str
-    pickup_date: str  # ISO date YYYY-MM-DD
+    pickup_date: str
     return_date: str
     total_price: Optional[float] = None
     payment_status: Literal["pendiente", "parcial", "pagado"] = "pendiente"
@@ -166,9 +205,6 @@ class PaymentIn(BaseModel):
     notes: Optional[str] = None
 
 
-# ---------------------------------------------------------------------------
-# Auth Endpoints
-# ---------------------------------------------------------------------------
 @api.post("/auth/register")
 async def register(data: RegisterIn, response: Response):
     email = data.email.lower()
@@ -230,9 +266,6 @@ async def me(user: dict = Depends(get_current_user)):
     return user
 
 
-# ---------------------------------------------------------------------------
-# Vehicles
-# ---------------------------------------------------------------------------
 @api.get("/vehicles")
 async def list_vehicles(
     user: dict = Depends(get_current_user),
@@ -284,9 +317,6 @@ async def delete_vehicle(vid: str, user: dict = Depends(require_admin)):
     return {"ok": True}
 
 
-# ---------------------------------------------------------------------------
-# Customers
-# ---------------------------------------------------------------------------
 @api.get("/customers")
 async def list_customers(user: dict = Depends(get_current_user), q: Optional[str] = None):
     query = {}
@@ -336,9 +366,6 @@ async def delete_customer(cid: str, user: dict = Depends(require_admin)):
     return {"ok": True}
 
 
-# ---------------------------------------------------------------------------
-# Reservations
-# ---------------------------------------------------------------------------
 async def check_overlap(vehicle_id: str, pickup: str, ret: str, exclude_id: Optional[str] = None) -> bool:
     p, r = parse_date(pickup), parse_date(ret)
     query = {
@@ -378,7 +405,6 @@ async def list_reservations(
     if q:
         query["reservation_number"] = {"$regex": q, "$options": "i"}
     items = await db.reservations.find(query, {"_id": 0}).sort("created_at", -1).to_list(1000)
-    # enrich with customer & vehicle name
     cust_ids = {x["customer_id"] for x in items}
     veh_ids = {x["vehicle_id"] for x in items}
     custs = {c["id"]: c async for c in db.customers.find({"id": {"$in": list(cust_ids)}}, {"_id": 0})}
@@ -414,7 +440,6 @@ async def create_reservation(data: ReservationIn, user: dict = Depends(get_curre
     doc["paid_amount"] = 0.0
     await db.reservations.insert_one(doc)
 
-    # update vehicle status if reservation is current
     today = date.today()
     if parse_date(data.pickup_date) <= today <= parse_date(data.return_date):
         await db.vehicles.update_one({"id": data.vehicle_id}, {"$set": {"status": "alquilado"}})
@@ -449,9 +474,6 @@ async def delete_reservation(rid: str, user: dict = Depends(require_admin)):
     return {"ok": True}
 
 
-# ---------------------------------------------------------------------------
-# Payments
-# ---------------------------------------------------------------------------
 @api.get("/payments")
 async def list_payments(user: dict = Depends(get_current_user), reservation_id: Optional[str] = None):
     q = {"reservation_id": reservation_id} if reservation_id else {}
@@ -506,9 +528,6 @@ async def delete_payment(pid: str, user: dict = Depends(require_admin)):
     return {"ok": True}
 
 
-# ---------------------------------------------------------------------------
-# Dashboard
-# ---------------------------------------------------------------------------
 @api.get("/dashboard/stats")
 async def dashboard_stats(user: dict = Depends(get_current_user)):
     active = await db.reservations.count_documents({"status": "en_curso"})
@@ -516,13 +535,11 @@ async def dashboard_stats(user: dict = Depends(get_current_user)):
     available = await db.vehicles.count_documents({"status": "disponible"})
     total_vehicles = await db.vehicles.count_documents({})
 
-    # revenue: sum of all payments
     total_revenue_agg = await db.payments.aggregate(
         [{"$group": {"_id": None, "sum": {"$sum": "$amount"}}}]
     ).to_list(1)
     total_revenue = total_revenue_agg[0]["sum"] if total_revenue_agg else 0
 
-    # pending payments: sum of (total_price - paid_amount) for non-cancelled
     pending = 0.0
     async for r in db.reservations.find({"status": {"$ne": "cancelada"}}, {"_id": 0}):
         pending += max(0.0, float(r.get("total_price", 0)) - float(r.get("paid_amount", 0)))
@@ -536,7 +553,6 @@ async def dashboard_stats(user: dict = Depends(get_current_user)):
         it["customer_name"] = custs.get(it["customer_id"], {}).get("full_name", "—")
         it["vehicle_name"] = vehs.get(it["vehicle_id"], {}).get("name", "—")
 
-    # 7-day revenue trend
     trend = []
     for i in range(6, -1, -1):
         d = (datetime.now(timezone.utc) - timedelta(days=i)).date()
@@ -558,12 +574,8 @@ async def dashboard_stats(user: dict = Depends(get_current_user)):
     }
 
 
-# ---------------------------------------------------------------------------
-# Reports
-# ---------------------------------------------------------------------------
 @api.get("/reports/summary")
 async def reports_summary(user: dict = Depends(get_current_user), period: str = "month"):
-    """period: week or month"""
     days = 7 if period == "week" else 30
     start = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
 
@@ -578,7 +590,6 @@ async def reports_summary(user: dict = Depends(get_current_user), period: str = 
     async for r in db.reservations.find({"status": {"$ne": "cancelada"}}, {"_id": 0}):
         pending += max(0.0, float(r.get("total_price", 0)) - float(r.get("paid_amount", 0)))
 
-    # most rented vehicles
     pipeline = [
         {"$match": {"created_at": {"$gte": start}}},
         {"$group": {"_id": "$vehicle_id", "count": {"$sum": 1}, "revenue": {"$sum": "$total_price"}}},
@@ -642,9 +653,6 @@ async def export_csv(user: dict = Depends(get_current_user), period: str = "mont
     )
 
 
-# ---------------------------------------------------------------------------
-# Calendar view: list reservations between dates
-# ---------------------------------------------------------------------------
 @api.get("/reservations/calendar")
 async def reservations_calendar(
     user: dict = Depends(get_current_user),
@@ -671,9 +679,6 @@ async def reservations_calendar(
     return items
 
 
-# ---------------------------------------------------------------------------
-# Health
-# ---------------------------------------------------------------------------
 @api.get("/")
 async def root():
     return {"app": "RentaFlow", "ok": True}
@@ -721,7 +726,6 @@ async def on_startup():
             {"$set": {"password_hash": hash_password(admin_password)}},
         )
 
-    # Seed staff demo user if not exists
     staff_email = "staff@rentcar.com"
     if not await db.users.find_one({"email": staff_email}):
         await db.users.insert_one({
