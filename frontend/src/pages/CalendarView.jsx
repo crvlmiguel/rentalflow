@@ -4,10 +4,10 @@ import { Button } from "@/components/ui/button";
 import { CaretLeft, CaretRight } from "@phosphor-icons/react";
 import StatusBadge from "@/components/StatusBadge";
 
-const DAYS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
+const DAYS = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
 const MONTHS = [
-  "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-  "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre",
+  "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+  "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
 ];
 
 function pad(n) { return n.toString().padStart(2, "0"); }
@@ -58,9 +58,9 @@ export default function CalendarView() {
     <div className="space-y-6 animate-fade-in" data-testid="calendar-page">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <div className="label-uppercase mb-2">Vista mensual</div>
-          <h1 className="font-display text-3xl sm:text-4xl font-bold tracking-tight text-zinc-950">Calendario</h1>
-          <p className="text-zinc-500 mt-1">Disponibilidad y reservas activas.</p>
+          <div className="label-uppercase mb-2">Vista mensal</div>
+          <h1 className="font-display text-3xl sm:text-4xl font-bold tracking-tight text-zinc-950">Calendário</h1>
+          <p className="text-zinc-500 mt-1">Disponibilidade e reservas ativas.</p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="icon" onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1))} data-testid="calendar-prev">
@@ -73,7 +73,7 @@ export default function CalendarView() {
             <CaretRight size={16} weight="bold" />
           </Button>
           <Button variant="outline" size="sm" onClick={() => { const d = new Date(); d.setDate(1); setCursor(d); }} data-testid="calendar-today">
-            Hoy
+            Hoje
           </Button>
         </div>
       </div>
@@ -106,7 +106,7 @@ export default function CalendarView() {
                       {e.vehicle_name?.split(" ")[0] || "—"} · {e.customer_name?.split(" ")[0] || ""}
                     </div>
                   ))}
-                  {evts.length > 3 && <div className="text-[10px] text-zinc-500">+{evts.length - 3} más</div>}
+                  {evts.length > 3 && <div className="text-[10px] text-zinc-500">+{evts.length - 3} mais</div>}
                 </div>
               </div>
             );
@@ -117,7 +117,7 @@ export default function CalendarView() {
       {selected && (
         <div className="fixed inset-0 z-50 grid place-items-center p-4 bg-zinc-900/50" onClick={() => setSelected(null)}>
           <div className="bg-white rounded-xl max-w-lg w-full p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
-            <div className="label-uppercase mb-2">Reservas del día</div>
+            <div className="label-uppercase mb-2">Reservas do dia</div>
             <h3 className="font-display text-2xl font-bold mb-4">{selected.day}</h3>
             <div className="space-y-3 max-h-[60vh] overflow-y-auto">
               {selected.events.map((r) => (
@@ -132,7 +132,7 @@ export default function CalendarView() {
                 </div>
               ))}
             </div>
-            <Button variant="outline" className="w-full mt-4" onClick={() => setSelected(null)}>Cerrar</Button>
+            <Button variant="outline" className="w-full mt-4" onClick={() => setSelected(null)}>Fechar</Button>
           </div>
         </div>
       )}
