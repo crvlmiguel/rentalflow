@@ -9,7 +9,7 @@ const api = axios.create({
 });
 
 export function formatApiErrorDetail(detail) {
-  if (detail == null) return "Algo salió mal. Intenta de nuevo.";
+  if (detail == null) return "Algo correu mal. Tente novamente.";
   if (typeof detail === "string") return detail;
   if (Array.isArray(detail))
     return detail.map((e) => (e && typeof e.msg === "string" ? e.msg : JSON.stringify(e))).join(" ");
