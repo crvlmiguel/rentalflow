@@ -12,16 +12,16 @@ import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
 
 const RES_STATUSES = [
-  { v: "pendiente", l: "Pendiente" },
+  { v: "pendiente", l: "Pendente" },
   { v: "confirmada", l: "Confirmada" },
-  { v: "en_curso", l: "En curso" },
-  { v: "completada", l: "Completada" },
+  { v: "en_curso", l: "Em curso" },
+  { v: "completada", l: "Concluída" },
   { v: "cancelada", l: "Cancelada" },
 ];
 const PAY_STATUSES = [
-  { v: "pendiente", l: "Pendiente" },
+  { v: "pendiente", l: "Pendente" },
   { v: "parcial", l: "Parcial" },
-  { v: "pagado", l: "Pagado" },
+  { v: "pagado", l: "Pago" },
 ];
 
 const today = new Date().toISOString().slice(0, 10);
@@ -94,7 +94,7 @@ export default function Reservations() {
       const payload = { ...form, total_price: parseFloat(form.total_price) || 0 };
       if (editing) await api.put(`/reservations/${editing}`, payload);
       else await api.post("/reservations", payload);
-      toast.success(editing ? "Reserva actualizada" : "Reserva creada");
+      toast.success(editing ? "Reserva atualizada" : "Reserva criada");
       setOpen(false); load();
     } catch (e) {
       toast.error(formatApiErrorDetail(e.response?.data?.detail));
@@ -102,7 +102,7 @@ export default function Reservations() {
   };
 
   const remove = async (id) => {
-    if (!window.confirm("¿Eliminar reserva?")) return;
+    if (!window.confirm("Eliminar esta reserva?")) return;
     try { await api.delete(`/reservations/${id}`); toast.success("Reserva eliminada"); load(); }
     catch (e) { toast.error(formatApiErrorDetail(e.response?.data?.detail)); }
   };
@@ -111,24 +111,24 @@ export default function Reservations() {
     <div className="space-y-6 animate-fade-in" data-testid="reservations-page">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <div className="label-uppercase mb-2">Operación</div>
+          <div className="label-uppercase mb-2">Operação</div>
           <h1 className="font-display text-3xl sm:text-4xl font-bold tracking-tight text-zinc-950">Reservas</h1>
-          <p className="text-zinc-500 mt-1">Gestiona reservas y disponibilidad de vehículos.</p>
+          <p className="text-zinc-500 mt-1">Gere reservas e disponibilidade de veículos.</p>
         </div>
         <Button onClick={openNew} className="bg-zinc-900 hover:bg-zinc-800 text-white" data-testid="add-reservation-button">
-          <Plus size={16} weight="bold" className="mr-1.5" /> Nueva reserva
+          <Plus size={16} weight="bold" className="mr-1.5" /> Nova reserva
         </Button>
       </div>
 
       <div className="app-card p-4 flex flex-wrap gap-3 items-center">
         <div className="relative flex-1 min-w-[220px] max-w-md">
           <MagnifyingGlass size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
-          <Input placeholder="Buscar por número de reserva…" value={filter.q} onChange={(e) => setFilter({ ...filter, q: e.target.value })} className="pl-9" data-testid="reservations-search" />
+          <Input placeholder="Pesquisar por número de reserva…" value={filter.q} onChange={(e) => setFilter({ ...filter, q: e.target.value })} className="pl-9" data-testid="reservations-search" />
         </div>
         <Select value={filter.status} onValueChange={(v) => setFilter({ ...filter, status: v })}>
           <SelectTrigger className="w-[180px]" data-testid="reservations-status-filter"><SelectValue placeholder="Estado" /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Todos los estados</SelectItem>
+            <SelectItem value="all">Todos os estados</SelectItem>
             {RES_STATUSES.map(s => <SelectItem key={s.v} value={s.v}>{s.l}</SelectItem>)}
           </SelectContent>
         </Select>
@@ -138,18 +138,18 @@ export default function Reservations() {
         <table className="w-full text-sm" data-testid="reservations-table">
           <thead className="bg-zinc-50 text-zinc-500">
             <tr>
-              <th className="text-left font-bold uppercase tracking-wider text-[11px] py-3 px-4">N°</th>
+              <th className="text-left font-bold uppercase tracking-wider text-[11px] py-3 px-4">N.º</th>
               <th className="text-left font-bold uppercase tracking-wider text-[11px] py-3 px-4">Cliente</th>
-              <th className="text-left font-bold uppercase tracking-wider text-[11px] py-3 px-4">Vehículo</th>
-              <th className="text-left font-bold uppercase tracking-wider text-[11px] py-3 px-4">Fechas</th>
+              <th className="text-left font-bold uppercase tracking-wider text-[11px] py-3 px-4">Veículo</th>
+              <th className="text-left font-bold uppercase tracking-wider text-[11px] py-3 px-4">Datas</th>
               <th className="text-right font-bold uppercase tracking-wider text-[11px] py-3 px-4">Total</th>
-              <th className="text-center font-bold uppercase tracking-wider text-[11px] py-3 px-4">Pago</th>
+              <th className="text-center font-bold uppercase tracking-wider text-[11px] py-3 px-4">Pagamento</th>
               <th className="text-center font-bold uppercase tracking-wider text-[11px] py-3 px-4">Estado</th>
-              <th className="text-right font-bold uppercase tracking-wider text-[11px] py-3 px-4">Acciones</th>
+              <th className="text-right font-bold uppercase tracking-wider text-[11px] py-3 px-4">Ações</th>
             </tr>
           </thead>
           <tbody>
-            {items.length === 0 && <tr><td colSpan={8} className="text-center text-zinc-500 py-12">Sin reservas.</td></tr>}
+            {items.length === 0 && <tr><td colSpan={8} className="text-center text-zinc-500 py-12">Sem reservas.</td></tr>}
             {items.map((r) => (
               <tr key={r.id} className="border-t border-zinc-100 hover:bg-zinc-50/60" data-testid={`reservation-row-${r.id}`}>
                 <td className="py-3 px-4 font-mono text-xs text-zinc-700">{r.reservation_number}</td>
@@ -182,23 +182,23 @@ export default function Reservations() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
-            <DialogTitle className="font-display">{editing ? "Editar reserva" : "Nueva reserva"}</DialogTitle>
+            <DialogTitle className="font-display">{editing ? "Editar reserva" : "Nova reserva"}</DialogTitle>
           </DialogHeader>
           <form onSubmit={save} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <Label className="label-uppercase mb-1.5 block">Cliente</Label>
                 <Select value={form.customer_id} onValueChange={(v) => setForm({ ...form, customer_id: v })}>
-                  <SelectTrigger data-testid="reservation-customer-select"><SelectValue placeholder="Selecciona cliente" /></SelectTrigger>
+                  <SelectTrigger data-testid="reservation-customer-select"><SelectValue placeholder="Selecione o cliente" /></SelectTrigger>
                   <SelectContent>
                     {customers.map(c => <SelectItem key={c.id} value={c.id}>{c.full_name}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
               <div>
-                <Label className="label-uppercase mb-1.5 block">Vehículo</Label>
+                <Label className="label-uppercase mb-1.5 block">Veículo</Label>
                 <Select value={form.vehicle_id} onValueChange={(v) => setForm({ ...form, vehicle_id: v })}>
-                  <SelectTrigger data-testid="reservation-vehicle-select"><SelectValue placeholder="Selecciona vehículo" /></SelectTrigger>
+                  <SelectTrigger data-testid="reservation-vehicle-select"><SelectValue placeholder="Selecione o veículo" /></SelectTrigger>
                   <SelectContent>
                     {vehicles.map(v => <SelectItem key={v.id} value={v.id}>{v.name} · {v.license_plate} · ${v.daily_price}/d</SelectItem>)}
                   </SelectContent>
@@ -207,11 +207,11 @@ export default function Reservations() {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <Label className="label-uppercase mb-1.5 block">Fecha recogida</Label>
+                <Label className="label-uppercase mb-1.5 block">Data de recolha</Label>
                 <Input type="date" value={form.pickup_date} onChange={(e) => setForm({ ...form, pickup_date: e.target.value })} required data-testid="reservation-pickup-input" />
               </div>
               <div>
-                <Label className="label-uppercase mb-1.5 block">Fecha devolución</Label>
+                <Label className="label-uppercase mb-1.5 block">Data de devolução</Label>
                 <Input type="date" value={form.return_date} onChange={(e) => setForm({ ...form, return_date: e.target.value })} required data-testid="reservation-return-input" />
               </div>
             </div>
@@ -221,14 +221,14 @@ export default function Reservations() {
                 <Input type="number" step="0.01" value={form.total_price} onChange={(e) => setForm({ ...form, total_price: e.target.value })} data-testid="reservation-total-input" />
               </div>
               <div>
-                <Label className="label-uppercase mb-1.5 block">Estado pago</Label>
+                <Label className="label-uppercase mb-1.5 block">Estado do pagamento</Label>
                 <Select value={form.payment_status} onValueChange={(v) => setForm({ ...form, payment_status: v })}>
                   <SelectTrigger data-testid="reservation-payment-status-select"><SelectValue /></SelectTrigger>
                   <SelectContent>{PAY_STATUSES.map(s => <SelectItem key={s.v} value={s.v}>{s.l}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
               <div>
-                <Label className="label-uppercase mb-1.5 block">Estado reserva</Label>
+                <Label className="label-uppercase mb-1.5 block">Estado da reserva</Label>
                 <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v })}>
                   <SelectTrigger data-testid="reservation-status-select"><SelectValue /></SelectTrigger>
                   <SelectContent>{RES_STATUSES.map(s => <SelectItem key={s.v} value={s.v}>{s.l}</SelectItem>)}</SelectContent>
@@ -242,7 +242,7 @@ export default function Reservations() {
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
               <Button type="submit" disabled={loading} className="bg-zinc-900 hover:bg-zinc-800 text-white" data-testid="save-reservation-button">
-                {loading ? "Guardando…" : "Guardar"}
+                {loading ? "A guardar…" : "Guardar"}
               </Button>
             </DialogFooter>
           </form>
