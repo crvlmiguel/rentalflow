@@ -1,21 +1,21 @@
 const RES_LABEL = {
-  pendiente: { label: "Pendiente", cls: "badge-warning" },
+  pendiente: { label: "Pendente", cls: "badge-warning" },
   confirmada: { label: "Confirmada", cls: "badge-info" },
-  en_curso: { label: "En curso", cls: "badge-info" },
-  completada: { label: "Completada", cls: "badge-success" },
+  en_curso: { label: "Em curso", cls: "badge-info" },
+  completada: { label: "Concluída", cls: "badge-success" },
   cancelada: { label: "Cancelada", cls: "badge-error" },
 };
 
 const PAY_LABEL = {
-  pendiente: { label: "Pendiente", cls: "badge-warning" },
+  pendiente: { label: "Pendente", cls: "badge-warning" },
   parcial: { label: "Parcial", cls: "badge-info" },
-  pagado: { label: "Pagado", cls: "badge-success" },
+  pagado: { label: "Pago", cls: "badge-success" },
 };
 
 const VEH_LABEL = {
-  disponible: { label: "Disponible", cls: "badge-success" },
-  alquilado: { label: "Alquilado", cls: "badge-info" },
-  mantenimiento: { label: "Mantenimiento", cls: "badge-warning" },
+  disponible: { label: "Disponível", cls: "badge-success" },
+  alquilado: { label: "Alugado", cls: "badge-info" },
+  mantenimiento: { label: "Manutenção", cls: "badge-warning" },
 };
 
 export default function StatusBadge({ status, kind = "reservation" }) {
