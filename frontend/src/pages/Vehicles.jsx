@@ -15,15 +15,15 @@ const CATS = [
   { v: "economico", l: "Económico" },
   { v: "compacto", l: "Compacto" },
   { v: "suv", l: "SUV" },
-  { v: "lujo", l: "Lujo" },
+  { v: "lujo", l: "Luxo" },
   { v: "van", l: "Van" },
-  { v: "deportivo", l: "Deportivo" },
+  { v: "deportivo", l: "Desportivo" },
 ];
 
 const STATUSES = [
-  { v: "disponible", l: "Disponible" },
-  { v: "alquilado", l: "Alquilado" },
-  { v: "mantenimiento", l: "Mantenimiento" },
+  { v: "disponible", l: "Disponível" },
+  { v: "alquilado", l: "Alugado" },
+  { v: "mantenimiento", l: "Manutenção" },
 ];
 
 const empty = { name: "", license_plate: "", category: "economico", daily_price: 0, status: "disponible", image_url: "", notes: "" };
@@ -54,10 +54,10 @@ export default function Vehicles() {
       const payload = { ...form, daily_price: parseFloat(form.daily_price) || 0 };
       if (editing) {
         await api.put(`/vehicles/${editing}`, payload);
-        toast.success("Vehículo actualizado");
+        toast.success("Veículo atualizado");
       } else {
         await api.post("/vehicles", payload);
-        toast.success("Vehículo creado");
+        toast.success("Veículo criado");
       }
       setOpen(false);
       await load();
@@ -69,10 +69,10 @@ export default function Vehicles() {
   };
 
   const remove = async (id) => {
-    if (!window.confirm("¿Eliminar este vehículo?")) return;
+    if (!window.confirm("Eliminar este veículo?")) return;
     try {
       await api.delete(`/vehicles/${id}`);
-      toast.success("Vehículo eliminado");
+      toast.success("Veículo eliminado");
       await load();
     } catch (e) {
       toast.error(formatApiErrorDetail(e.response?.data?.detail));
@@ -83,24 +83,24 @@ export default function Vehicles() {
     <div className="space-y-6 animate-fade-in" data-testid="vehicles-page">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <div className="label-uppercase mb-2">Flota</div>
-          <h1 className="font-display text-3xl sm:text-4xl font-bold tracking-tight text-zinc-950">Vehículos</h1>
-          <p className="text-zinc-500 mt-1">Administra tu inventario de vehículos.</p>
+          <div className="label-uppercase mb-2">Frota</div>
+          <h1 className="font-display text-3xl sm:text-4xl font-bold tracking-tight text-zinc-950">Veículos</h1>
+          <p className="text-zinc-500 mt-1">Gira o seu inventário de veículos.</p>
         </div>
         <Button onClick={openNew} className="bg-zinc-900 hover:bg-zinc-800 text-white" data-testid="add-vehicle-button">
-          <Plus size={16} weight="bold" className="mr-1.5" /> Nuevo vehículo
+          <Plus size={16} weight="bold" className="mr-1.5" /> Novo veículo
         </Button>
       </div>
 
       <div className="app-card p-4">
         <div className="relative max-w-md">
           <MagnifyingGlass size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
-          <Input placeholder="Buscar por nombre o placa…" value={q} onChange={(e) => setQ(e.target.value)} className="pl-9" data-testid="vehicles-search" />
+          <Input placeholder="Pesquisar por nome ou matrícula…" value={q} onChange={(e) => setQ(e.target.value)} className="pl-9" data-testid="vehicles-search" />
         </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5" data-testid="vehicles-list">
-        {items.length === 0 && <div className="text-zinc-500 col-span-full text-center py-12">No hay vehículos. Agrega el primero.</div>}
+        {items.length === 0 && <div className="text-zinc-500 col-span-full text-center py-12">Não há veículos. Adicione o primeiro.</div>}
         {items.map((v) => (
           <div key={v.id} className="app-card overflow-hidden" data-testid={`vehicle-card-${v.id}`}>
             <div className="aspect-video bg-zinc-100 grid place-items-center overflow-hidden">
@@ -120,7 +120,7 @@ export default function Vehicles() {
               </div>
               <div className="flex items-center justify-between mt-4 pt-4 border-t border-zinc-100">
                 <div>
-                  <div className="text-[10px] uppercase tracking-wider text-zinc-500">Por día</div>
+                  <div className="text-[10px] uppercase tracking-wider text-zinc-500">Por dia</div>
                   <div className="font-display font-bold text-lg text-zinc-950">${Number(v.daily_price).toFixed(2)}</div>
                 </div>
                 <div className="text-[10px] uppercase tracking-wider text-zinc-500 bg-zinc-100 rounded-md px-2 py-1">
@@ -145,26 +145,26 @@ export default function Vehicles() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-lg" data-testid="vehicle-dialog">
           <DialogHeader>
-            <DialogTitle className="font-display">{editing ? "Editar vehículo" : "Nuevo vehículo"}</DialogTitle>
+            <DialogTitle className="font-display">{editing ? "Editar veículo" : "Novo veículo"}</DialogTitle>
           </DialogHeader>
           <form onSubmit={save} className="space-y-4">
             <div>
-              <Label className="label-uppercase mb-1.5 block">Nombre / Modelo</Label>
+              <Label className="label-uppercase mb-1.5 block">Nome / Modelo</Label>
               <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required data-testid="vehicle-name-input" />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="label-uppercase mb-1.5 block">Placa</Label>
+                <Label className="label-uppercase mb-1.5 block">Matrícula</Label>
                 <Input value={form.license_plate} onChange={(e) => setForm({ ...form, license_plate: e.target.value })} required data-testid="vehicle-plate-input" />
               </div>
               <div>
-                <Label className="label-uppercase mb-1.5 block">Precio diario</Label>
+                <Label className="label-uppercase mb-1.5 block">Preço diário</Label>
                 <Input type="number" step="0.01" min="0" value={form.daily_price} onChange={(e) => setForm({ ...form, daily_price: e.target.value })} required data-testid="vehicle-price-input" />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="label-uppercase mb-1.5 block">Categoría</Label>
+                <Label className="label-uppercase mb-1.5 block">Categoria</Label>
                 <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}>
                   <SelectTrigger data-testid="vehicle-category-select"><SelectValue /></SelectTrigger>
                   <SelectContent>{CATS.map(c => <SelectItem key={c.v} value={c.v}>{c.l}</SelectItem>)}</SelectContent>
@@ -179,7 +179,7 @@ export default function Vehicles() {
               </div>
             </div>
             <div>
-              <Label className="label-uppercase mb-1.5 block">Imagen URL (opcional)</Label>
+              <Label className="label-uppercase mb-1.5 block">URL da imagem (opcional)</Label>
               <Input value={form.image_url || ""} onChange={(e) => setForm({ ...form, image_url: e.target.value })} placeholder="https://…" data-testid="vehicle-image-input" />
             </div>
             <div>
@@ -189,7 +189,7 @@ export default function Vehicles() {
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
               <Button type="submit" disabled={loading} className="bg-zinc-900 hover:bg-zinc-800 text-white" data-testid="save-vehicle-button">
-                {loading ? "Guardando…" : "Guardar"}
+                {loading ? "A guardar…" : "Guardar"}
               </Button>
             </DialogFooter>
           </form>
