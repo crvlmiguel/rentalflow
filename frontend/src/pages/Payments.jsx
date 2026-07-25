@@ -12,9 +12,9 @@ import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
 
 const METHODS = [
-  { v: "efectivo", l: "Efectivo" },
-  { v: "transferencia", l: "Transferencia" },
-  { v: "tarjeta", l: "Tarjeta" },
+  { v: "efectivo", l: "Dinheiro" },
+  { v: "transferencia", l: "Transferência" },
+  { v: "tarjeta", l: "Cartão" },
 ];
 
 export default function Payments() {
@@ -40,7 +40,7 @@ export default function Payments() {
     e.preventDefault();
     try {
       await api.post("/payments", { ...form, amount: parseFloat(form.amount) || 0 });
-      toast.success("Pago registrado");
+      toast.success("Pagamento registado");
       setOpen(false); setForm({ reservation_id: "", amount: 0, method: "efectivo", notes: "" });
       loadAll();
     } catch (e) {
@@ -49,8 +49,8 @@ export default function Payments() {
   };
 
   const remove = async (id) => {
-    if (!window.confirm("¿Eliminar pago?")) return;
-    try { await api.delete(`/payments/${id}`); toast.success("Pago eliminado"); loadAll(); }
+    if (!window.confirm("Eliminar este pagamento?")) return;
+    try { await api.delete(`/payments/${id}`); toast.success("Pagamento eliminado"); loadAll(); }
     catch (e) { toast.error(formatApiErrorDetail(e.response?.data?.detail)); }
   };
 
@@ -60,12 +60,12 @@ export default function Payments() {
     <div className="space-y-6 animate-fade-in" data-testid="payments-page">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <div className="label-uppercase mb-2">Cobros</div>
-          <h1 className="font-display text-3xl sm:text-4xl font-bold tracking-tight text-zinc-950">Pagos</h1>
-          <p className="text-zinc-500 mt-1">Registra y consulta los pagos por reserva.</p>
+          <div className="label-uppercase mb-2">Cobranças</div>
+          <h1 className="font-display text-3xl sm:text-4xl font-bold tracking-tight text-zinc-950">Pagamentos</h1>
+          <p className="text-zinc-500 mt-1">Registe e consulte os pagamentos por reserva.</p>
         </div>
         <Button onClick={() => setOpen(true)} className="bg-zinc-900 hover:bg-zinc-800 text-white" data-testid="add-payment-button">
-          <Plus size={16} weight="bold" className="mr-1.5" /> Registrar pago
+          <Plus size={16} weight="bold" className="mr-1.5" /> Registar pagamento
         </Button>
       </div>
 
@@ -73,7 +73,7 @@ export default function Payments() {
         <Select value={filterRes} onValueChange={setFilterRes}>
           <SelectTrigger className="w-[300px]" data-testid="payments-reservation-filter"><SelectValue /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Todos los pagos</SelectItem>
+            <SelectItem value="all">Todos os pagamentos</SelectItem>
             {reservations.map(r => <SelectItem key={r.id} value={r.id}>{r.reservation_number} · {r.customer_name}</SelectItem>)}
           </SelectContent>
         </Select>
@@ -83,16 +83,16 @@ export default function Payments() {
         <table className="w-full text-sm" data-testid="payments-table">
           <thead className="bg-zinc-50 text-zinc-500">
             <tr>
-              <th className="text-left font-bold uppercase tracking-wider text-[11px] py-3 px-4">Fecha</th>
+              <th className="text-left font-bold uppercase tracking-wider text-[11px] py-3 px-4">Data</th>
               <th className="text-left font-bold uppercase tracking-wider text-[11px] py-3 px-4">Reserva</th>
               <th className="text-left font-bold uppercase tracking-wider text-[11px] py-3 px-4">Cliente</th>
-              <th className="text-right font-bold uppercase tracking-wider text-[11px] py-3 px-4">Monto</th>
+              <th className="text-right font-bold uppercase tracking-wider text-[11px] py-3 px-4">Montante</th>
               <th className="text-center font-bold uppercase tracking-wider text-[11px] py-3 px-4">Método</th>
-              <th className="text-right font-bold uppercase tracking-wider text-[11px] py-3 px-4">Acciones</th>
+              <th className="text-right font-bold uppercase tracking-wider text-[11px] py-3 px-4">Ações</th>
             </tr>
           </thead>
           <tbody>
-            {payments.length === 0 && <tr><td colSpan={6} className="text-center text-zinc-500 py-12">Sin pagos registrados.</td></tr>}
+            {payments.length === 0 && <tr><td colSpan={6} className="text-center text-zinc-500 py-12">Sem pagamentos registados.</td></tr>}
             {payments.map((p) => {
               const r = resByID[p.reservation_id];
               return (
@@ -123,13 +123,13 @@ export default function Payments() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="font-display">Registrar pago</DialogTitle>
+            <DialogTitle className="font-display">Registar pagamento</DialogTitle>
           </DialogHeader>
           <form onSubmit={save} className="space-y-4">
             <div>
               <Label className="label-uppercase mb-1.5 block">Reserva</Label>
               <Select value={form.reservation_id} onValueChange={(v) => setForm({ ...form, reservation_id: v })}>
-                <SelectTrigger data-testid="payment-reservation-select"><SelectValue placeholder="Selecciona reserva" /></SelectTrigger>
+                <SelectTrigger data-testid="payment-reservation-select"><SelectValue placeholder="Selecione a reserva" /></SelectTrigger>
                 <SelectContent>
                   {reservations.filter(r => r.status !== "cancelada").map(r => {
                     const balance = (Number(r.total_price) - Number(r.paid_amount || 0)).toFixed(2);
@@ -140,7 +140,7 @@ export default function Payments() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="label-uppercase mb-1.5 block">Monto</Label>
+                <Label className="label-uppercase mb-1.5 block">Montante</Label>
                 <Input type="number" step="0.01" min="0" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} required data-testid="payment-amount-input" />
               </div>
               <div>
@@ -157,7 +157,7 @@ export default function Payments() {
             </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-              <Button type="submit" className="bg-zinc-900 hover:bg-zinc-800 text-white" data-testid="save-payment-button">Registrar</Button>
+              <Button type="submit" className="bg-zinc-900 hover:bg-zinc-800 text-white" data-testid="save-payment-button">Registar</Button>
             </DialogFooter>
           </form>
         </DialogContent>
