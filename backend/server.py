@@ -119,14 +119,14 @@ async def get_current_user(request: Request) -> dict:
         if h.startswith("Bearer "):
             token = h[7:]
     if not token:
-        raise HTTPException(401, "No autenticado")
+        raise HTTPException(401, "Não autenticado")
     try:
         payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGO])
         if payload.get("type") != "access":
             raise HTTPException(401, "Token inválido")
         user = await db.users.find_one({"id": payload["sub"]}, {"_id": 0, "password_hash": 0})
         if not user:
-            raise HTTPException(401, "Usuario no encontrado")
+            raise HTTPException(401, "Utilizador não encontrado")
         return user
     except jwt.ExpiredSignatureError:
         raise HTTPException(401, "Token expirado")
@@ -136,7 +136,7 @@ async def get_current_user(request: Request) -> dict:
 
 async def require_admin(user: dict = Depends(get_current_user)) -> dict:
     if user.get("role") != "admin":
-        raise HTTPException(403, "Solo administradores")
+        raise HTTPException(403, "Apenas administradores")
     return user
 
 
@@ -209,7 +209,7 @@ class PaymentIn(BaseModel):
 async def register(data: RegisterIn, response: Response):
     email = data.email.lower()
     if await db.users.find_one({"email": email}):
-        raise HTTPException(400, "El correo ya está registrado")
+        raise HTTPException(400, "O e-mail já está registado")
     user = {
         "id": str(uuid.uuid4()),
         "email": email,
@@ -235,7 +235,7 @@ async def login(data: LoginIn, response: Response, request: Request):
     if rec and rec.get("count", 0) >= 5:
         locked_until = rec.get("locked_until")
         if locked_until and datetime.fromisoformat(locked_until) > datetime.now(timezone.utc):
-            raise HTTPException(429, "Demasiados intentos. Intenta más tarde.")
+            raise HTTPException(429, "Demasiadas tentativas. Tente mais tarde.")
 
     user = await db.users.find_one({"email": email})
     if not user or not verify_password(data.password, user["password_hash"]):
@@ -245,7 +245,7 @@ async def login(data: LoginIn, response: Response, request: Request):
              "$set": {"locked_until": (datetime.now(timezone.utc) + timedelta(minutes=15)).isoformat()}},
             upsert=True,
         )
-        raise HTTPException(401, "Credenciales inválidas")
+        raise HTTPException(401, "Credenciais inválidas")
 
     await db.login_attempts.delete_one({"identifier": identifier})
     set_auth_cookies(response, user["id"], email)
@@ -293,7 +293,7 @@ async def create_vehicle(data: VehicleIn, user: dict = Depends(get_current_user)
     doc["id"] = str(uuid.uuid4())
     doc["created_at"] = now_iso()
     if await db.vehicles.find_one({"license_plate": doc["license_plate"]}):
-        raise HTTPException(400, "La placa ya existe")
+        raise HTTPException(400, "A matrícula já existe")
     await db.vehicles.insert_one(doc)
     doc.pop("_id", None)
     return doc
@@ -304,7 +304,7 @@ async def update_vehicle(vid: str, data: VehicleIn, user: dict = Depends(get_cur
     upd = data.model_dump()
     res = await db.vehicles.update_one({"id": vid}, {"$set": upd})
     if res.matched_count == 0:
-        raise HTTPException(404, "Vehículo no encontrado")
+        raise HTTPException(404, "Veículo não encontrado")
     doc = await db.vehicles.find_one({"id": vid}, {"_id": 0})
     return doc
 
@@ -312,7 +312,7 @@ async def update_vehicle(vid: str, data: VehicleIn, user: dict = Depends(get_cur
 @api.delete("/vehicles/{vid}")
 async def delete_vehicle(vid: str, user: dict = Depends(require_admin)):
     if await db.reservations.find_one({"vehicle_id": vid, "status": {"$in": ["pendiente", "confirmada", "en_curso"]}}):
-        raise HTTPException(400, "Vehículo tiene reservas activas")
+        raise HTTPException(400, "O veículo tem reservas ativas")
     await db.vehicles.delete_one({"id": vid})
     return {"ok": True}
 
@@ -335,7 +335,7 @@ async def list_customers(user: dict = Depends(get_current_user), q: Optional[str
 async def get_customer(cid: str, user: dict = Depends(get_current_user)):
     cust = await db.customers.find_one({"id": cid}, {"_id": 0})
     if not cust:
-        raise HTTPException(404, "Cliente no encontrado")
+        raise HTTPException(404, "Cliente não encontrado")
     history = await db.reservations.find({"customer_id": cid}, {"_id": 0}).sort("created_at", -1).to_list(500)
     return {"customer": cust, "history": history}
 
@@ -354,14 +354,14 @@ async def create_customer(data: CustomerIn, user: dict = Depends(get_current_use
 async def update_customer(cid: str, data: CustomerIn, user: dict = Depends(get_current_user)):
     res = await db.customers.update_one({"id": cid}, {"$set": data.model_dump()})
     if res.matched_count == 0:
-        raise HTTPException(404, "Cliente no encontrado")
+        raise HTTPException(404, "Cliente não encontrado")
     return await db.customers.find_one({"id": cid}, {"_id": 0})
 
 
 @api.delete("/customers/{cid}")
 async def delete_customer(cid: str, user: dict = Depends(require_admin)):
     if await db.reservations.find_one({"customer_id": cid}):
-        raise HTTPException(400, "Cliente tiene reservas asociadas")
+        raise HTTPException(400, "O cliente tem reservas associadas")
     await db.customers.delete_one({"id": cid})
     return {"ok": True}
 
@@ -421,13 +421,13 @@ async def list_reservations(
 async def create_reservation(data: ReservationIn, user: dict = Depends(get_current_user)):
     cust = await db.customers.find_one({"id": data.customer_id})
     if not cust:
-        raise HTTPException(404, "Cliente no encontrado")
+        raise HTTPException(404, "Cliente não encontrado")
     veh = await db.vehicles.find_one({"id": data.vehicle_id})
     if not veh:
-        raise HTTPException(404, "Vehículo no encontrado")
+        raise HTTPException(404, "Veículo não encontrado")
 
     if await check_overlap(data.vehicle_id, data.pickup_date, data.return_date):
-        raise HTTPException(400, "El vehículo no está disponible en esas fechas")
+        raise HTTPException(400, "O veículo não está disponível nessas datas")
 
     doc = data.model_dump()
     doc["id"] = str(uuid.uuid4())
@@ -452,9 +452,9 @@ async def create_reservation(data: ReservationIn, user: dict = Depends(get_curre
 async def update_reservation(rid: str, data: ReservationIn, user: dict = Depends(get_current_user)):
     existing = await db.reservations.find_one({"id": rid}, {"_id": 0})
     if not existing:
-        raise HTTPException(404, "Reserva no encontrada")
+        raise HTTPException(404, "Reserva não encontrada")
     if await check_overlap(data.vehicle_id, data.pickup_date, data.return_date, exclude_id=rid):
-        raise HTTPException(400, "El vehículo no está disponible en esas fechas")
+        raise HTTPException(400, "O veículo não está disponível nessas datas")
     upd = data.model_dump()
     veh = await db.vehicles.find_one({"id": data.vehicle_id})
     if not upd.get("total_price"):
@@ -468,7 +468,7 @@ async def update_reservation(rid: str, data: ReservationIn, user: dict = Depends
 async def delete_reservation(rid: str, user: dict = Depends(require_admin)):
     res = await db.reservations.find_one({"id": rid})
     if not res:
-        raise HTTPException(404, "Reserva no encontrada")
+        raise HTTPException(404, "Reserva não encontrada")
     await db.payments.delete_many({"reservation_id": rid})
     await db.reservations.delete_one({"id": rid})
     return {"ok": True}
@@ -485,7 +485,7 @@ async def list_payments(user: dict = Depends(get_current_user), reservation_id: 
 async def create_payment(data: PaymentIn, user: dict = Depends(get_current_user)):
     res = await db.reservations.find_one({"id": data.reservation_id}, {"_id": 0})
     if not res:
-        raise HTTPException(404, "Reserva no encontrada")
+        raise HTTPException(404, "Reserva não encontrada")
 
     doc = data.model_dump()
     doc["id"] = str(uuid.uuid4())
@@ -513,7 +513,7 @@ async def create_payment(data: PaymentIn, user: dict = Depends(get_current_user)
 async def delete_payment(pid: str, user: dict = Depends(require_admin)):
     pay = await db.payments.find_one({"id": pid}, {"_id": 0})
     if not pay:
-        raise HTTPException(404, "Pago no encontrado")
+        raise HTTPException(404, "Pagamento não encontrado")
     await db.payments.delete_one({"id": pid})
     res = await db.reservations.find_one({"id": pay["reservation_id"]}, {"_id": 0})
     if res:
@@ -627,8 +627,8 @@ async def export_csv(user: dict = Depends(get_current_user), period: str = "mont
 
     buf = io.StringIO()
     w = csv.writer(buf)
-    w.writerow(["N° Reserva", "Cliente", "Vehículo", "Placa", "Fecha Recogida", "Fecha Devolución",
-                "Total", "Pagado", "Estado Pago", "Estado Reserva", "Creada"])
+    w.writerow(["N.º Reserva", "Cliente", "Veículo", "Matrícula", "Data de Recolha", "Data de Devolução",
+                "Total", "Pago", "Estado do Pagamento", "Estado da Reserva", "Criada em"])
     for it in items:
         c = custs.get(it["customer_id"], {})
         v = vehs.get(it["vehicle_id"], {})
@@ -649,7 +649,7 @@ async def export_csv(user: dict = Depends(get_current_user), period: str = "mont
     return StreamingResponse(
         iter([buf.getvalue()]),
         media_type="text/csv",
-        headers={"Content-Disposition": f"attachment; filename=reporte_{period}.csv"},
+        headers={"Content-Disposition": f"attachment; filename=relatorio_{period}.csv"},
     )
 
 
